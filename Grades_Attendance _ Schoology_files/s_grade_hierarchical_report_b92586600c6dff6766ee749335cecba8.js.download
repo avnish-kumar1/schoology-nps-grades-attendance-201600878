@@ -1,0 +1,30 @@
+Drupal.behaviors.sGradeHierarchicalReport = function(context) {
+    function toggleChildRows(args){
+        var $row = $('.report-row[data-id=' + args.id + ']', args.reportContext);
+        var $childRows = $('.report-row[data-parent-id=' + args.id + ']', args.reportContext);
+        if('collapse' in args){
+            $row.toggleClass('childrenCollapsed', args.collapse);
+        }
+        else{
+            $row.toggleClass('childrenCollapsed');
+        }
+        if($row.hasClass('childrenCollapsed')){
+            $childRows.addClass('hidden');
+            $childRows.filter('.period-row, .category-row').each(function(){
+                toggleChildRows({id:$(this).data('id'), collapse:$row.hasClass('childrenCollapsed'), reportContext: args.reportContext}); //need to specify collapse
+            });
+        }
+        else{
+            $row.removeClass('childrenCollapsed');
+            $childRows.removeClass('hidden');
+        }
+    }
+
+    $('.hierarchical-grading-report:not(sGradeHierarchicalReport-processed)', context) .addClass('sGradeHierarchicalReport-processed').each(function(){
+       var report = this;
+       $('.period-row .title-column, .category-row .title-column ', this).click(function(){
+           toggleChildRows({id:$(this).closest('.report-row').data('id'), reportContext: report});
+       });
+    });
+}
+
